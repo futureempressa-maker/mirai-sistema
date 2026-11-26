@@ -10,10 +10,13 @@
 <p id="ld" style="padding:40px;text-align:center">Carregando o sistema Mirai…</p>
 <script>
 (async function(){
+  var pre='v2',n=7;
+  try{var v=(await (await fetch('versao.txt?t='+Date.now(),{cache:'no-store'})).text()).trim().split(/\s+/);if(/^v\d+$/.test(v[0])&&+v[1]>0){pre=v[0];n=+v[1]}}catch(e){}
   try{
-    var partes=await Promise.all([1,2,3,4,5].map(function(i){return fetch('p'+i+'.txt?v=1').then(function(r){if(!r.ok)throw new Error('parte '+i);return r.text()})}));
+    var idx=[];for(var i=1;i<=n;i++)idx.push(i);
+    var partes=await Promise.all(idx.map(function(i){return fetch(pre+'p'+i+'.txt').then(function(r){if(!r.ok)throw new Error('parte '+i);return r.text()})}));
     var bin=atob(partes.join('').replace(/\s/g,''));
-    var bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    var bytes=new Uint8Array(bin.length);for(var j=0;j<bin.length;j++)bytes[j]=bin.charCodeAt(j);
     var html=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
     document.open();document.write(html);document.close();
   }catch(e){document.getElementById('ld').textContent='Não foi possível carregar o sistema. Verifique a internet e recarregue a página.';}
